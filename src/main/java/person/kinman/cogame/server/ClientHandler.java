@@ -1,10 +1,14 @@
 package person.kinman.cogame.server;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 /**
@@ -18,6 +22,7 @@ public class ClientHandler implements Runnable {
     private PrintWriter out;
     private Room room; // 客户端所在房间
     private boolean isReady = false; // 是否准备
+    private static final Logger logger = LoggerFactory.getLogger(ClientHandler.class);
 
     public ClientHandler(Socket socket, RoomManager roomManager) {
         this.clientSocket = socket;
@@ -29,7 +34,7 @@ public class ClientHandler implements Runnable {
     public void run() {
         try {
             // 初始化输入输出流
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8));
             out = new PrintWriter(clientSocket.getOutputStream(), true);
 
             // 发送连接成功消息
@@ -41,7 +46,7 @@ public class ClientHandler implements Runnable {
             // 循环读取客户端消息
             String message;
             while ((message = in.readLine()) != null) {
-                System.out.println("收到来自 " + clientId + " 的消息: " + message);
+                logger.info("Received message from client: {}", message);
 
                 // 处理准备指令（简化逻辑：发送 "ready" 表示准备）
                 if (message.trim().equalsIgnoreCase("ready")) {
